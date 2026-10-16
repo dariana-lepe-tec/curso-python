@@ -1,18 +1,8 @@
-# Curso de Python - Tecmilenio
+# Fundamentos de programación
 
 
-
-\# Fundamentos de programación
-
-
-
-\*\*Alumno:\*\* Dariana Lepe
-
+**Alumno:** Dariana Lepe
 
 
 Repositorio de las actividades del curso Fundamentos de programación (Universidad Tecmilenio).
-
-Cada carpeta contiene los entregables de una semana; `semana1/` incluye la Actividad 1
-
-"Mi rutina digital": algoritmo, diagrama de flujo, notebook en Python y la Parte E.
-
+La carpeta semana1 contiene la Actividad 1 "Mi rutina digital": algoritmo, diagrama de flujo, notebook en Python y la Parte E.

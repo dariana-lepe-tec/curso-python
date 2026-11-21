@@ -15,3 +15,5 @@ La carpeta semana3 contiene la Actividad 3, avance del proyecto (Fase I): análi
 La carpeta semana4 contiene la Actividad de la tabla de Pitágoras: matriz de 10 x 10 con ciclos for anidados, una función que imprime la tabla, una función que consulta productos y casos de prueba.
 
 La carpeta semana5 contiene la Actividad 4, menú modular: un programa con menú que llama a una función por sección (tuplas, diccionarios, excepciones y strings), con la evidencia de ejecución de las pruebas.
+
+La carpeta semana6 contiene la Actividad 5, Certificación de Cisco Networking Academy — Python Essentials 1.

@@ -39,6 +39,17 @@ MENU = [
     ["0", "Salir"],
 ]
 
+# Menú de la venta, también como matriz
+MENU_VENTA = [
+    ["1", "Boleto adulto"],
+    ["2", "Boleto niño"],
+    ["3", "Boleto tercera edad"],
+    ["4", "Combo dulcería"],
+    ["5", "Cobrar orden"],
+    ["0", "Cancelar orden"],
+]
+
+
 # ==============================================================
 #  REQ 1, 2 y 3: inicio
 # ==============================================================
@@ -170,11 +181,279 @@ def inactividad():
 
 
 # ==============================================================
-#  PROGRAMA PRINCIPAL (versión 2: inicio + menú)
+#  REQ 7 y 8: archivos y excepciones
+# ==============================================================
+
+def archivos_disponibles():
+    """Req 7a: regresa la lista ordenada de los .txt de la carpeta."""
+    lista = []
+    for nombre in os.listdir("."):      # "." = carpeta donde corre el programa
+        if nombre.endswith(".txt"):
+            lista.append(nombre)
+    lista.sort()
+    return lista
+
+
+def mostrar_archivos():
+    """Req 7a: muestra los archivos .txt numerados y regresa la lista."""
+    lista = archivos_disponibles()
+    print("\n--- Archivos disponibles ---")
+    if len(lista) == 0:
+        print("(no hay archivos .txt en la carpeta)")
+    numero = 0
+    for nombre in lista:
+        numero = numero + 1
+        print(f"{numero}. {nombre}")
+    return lista
+
+
+def elegir_archivo():
+    """Muestra los archivos y deja elegir uno por número o por nombre.
+    Regresa el nombre elegido, o "" si la elección no sirve."""
+    lista = mostrar_archivos()
+    eleccion = input("Escribe el número o el nombre del archivo: ").strip()
+    if eleccion == "":
+        print("No escribiste nada.")
+        return ""
+    if eleccion.isdigit():
+        try:
+            posicion = int(eleccion) - 1        # la lista empieza en 0
+            if posicion < 0:                    # el 0 daría -1 = el último archivo
+                print("Los números empiezan en 1.")
+                return ""
+            return lista[posicion]
+        except IndexError:
+            print(f"No hay un archivo con el número {eleccion}. Elige del 1 al {len(lista)}.")
+            return ""
+    return eleccion                             # escribió el nombre
+
+
+def ver_archivo():
+    """Req 7b: deja elegir un archivo y muestra su contenido."""
+    nombre = elegir_archivo()
+    if nombre == "":
+        return
+    try:
+        with open(nombre, "r", encoding="utf-8") as f:
+            contenido = f.read()
+        print(f"\n----- {nombre} -----")
+        if contenido == "":
+            print("(el archivo está vacío)")
+        else:
+            print(contenido, end="")
+        print("-" * (len(nombre) + 12))
+    except FileNotFoundError:
+        print(f"El archivo '{nombre}' no existe. Revisa cómo lo escribiste.")
+    except PermissionError:
+        print(f"No tengo permiso para abrir '{nombre}' (o es una carpeta).")
+    except IsADirectoryError:
+        print(f"'{nombre}' es una carpeta, no un archivo.")
+    except UnicodeDecodeError:
+        print(f"'{nombre}' no es un archivo de texto que se pueda leer.")
+
+
+def anexar(nombre_archivo, texto, fecha):
+    """Req 7d: agrega un renglón con la fecha al final del archivo.
+    Usa el modo "a" (append): conserva lo anterior. Con "w" se borraría."""
+    try:
+        with open(nombre_archivo, "a", encoding="utf-8") as f:
+            f.write(f"[{fecha_texto(fecha)}] {texto}\n")
+        return True
+    except PermissionError:
+        print(f"No tengo permiso para escribir en '{nombre_archivo}'.")
+    except IsADirectoryError:
+        print(f"'{nombre_archivo}' es una carpeta, no un archivo.")
+    except OSError:
+        print(f"No se pudo escribir en '{nombre_archivo}'.")
+    return False
+
+
+def crear_archivo(fecha):
+    """Req 7c: crea un archivo nuevo con la fecha de creación en el primer renglón."""
+    nombre = input("Nombre del archivo nuevo: ").strip()
+    if nombre == "":
+        print("No escribiste ningún nombre.")
+        return
+    if not nombre.endswith(".txt"):
+        nombre = nombre + ".txt"
+    # Cuidado: el modo "w" borra un archivo que ya existe, por eso se revisa antes
+    if nombre in archivos_disponibles():
+        print(f"'{nombre}' ya existe. No lo creo para no borrar su contenido.")
+        return
+    try:
+        with open(nombre, "w", encoding="utf-8") as f:
+            f.write(f"[{fecha_texto(fecha)}] Archivo creado\n")
+        print(f"Se creó '{nombre}'.")
+    except FileNotFoundError:
+        print(f"No se pudo crear '{nombre}': la carpeta no existe.")
+    except PermissionError:
+        print(f"No tengo permiso para crear '{nombre}'.")
+    except OSError:
+        print(f"'{nombre}' no es un nombre válido. Evita caracteres como : * ? \" < > |")
+
+
+def agregar_registro(fecha):
+    """Req 7d: agrega un registro escrito por el usuario a un archivo existente."""
+    nombre = elegir_archivo()
+    if nombre == "":
+        return
+    if nombre not in archivos_disponibles():
+        print(f"El archivo '{nombre}' no existe. Para crearlo usa la opción 4.")
+        return
+    texto = input("Escribe el registro: ").strip()
+    if texto == "":
+        print("El registro está vacío, no se agregó nada.")
+        return
+    if anexar(nombre, texto, fecha):
+        print(f"Registro agregado a '{nombre}' con la fecha {fecha_texto(fecha)}.")
+
+
+def cargar_precios():
+    """RN1: lee precios.txt (producto,precio) y regresa un diccionario.
+    Si el archivo no existe o un renglón trae error, usa los precios base."""
+    precios = PRECIOS_BASE.copy()
+    try:
+        with open("precios.txt", "r", encoding="utf-8") as f:
+            for linea in f:
+                linea = linea.strip()
+                if linea == "":
+                    continue
+                try:
+                    producto, precio = linea.split(",")
+                    precios[producto.strip()] = float(precio)
+                except ValueError:
+                    print(f"Renglón con error en precios.txt: '{linea}' (se ignora)")
+    except FileNotFoundError:
+        print("No encontré precios.txt; uso los precios base.")
+    return precios
+
+
+# ==============================================================
+#  Venta y corte (lógica del prototipo de la semana 3)
+# ==============================================================
+
+def pedir_cantidad(mensaje):
+    """Pide una cantidad entera; regresa 0 si lo escrito no es un número."""
+    try:
+        return int(input(mensaje))
+    except ValueError:
+        print("Eso no es un número entero.")
+        return 0
+
+
+def registrar_venta(fecha, es_miercoles, precios):
+    """Arma una orden, la cobra con ticket y la guarda en ventas.txt."""
+    adultos = 0
+    ninos = 0
+    tercera = 0
+    combos = 0
+    while True:
+        dibujar_tabla(MENU_VENTA, "NUEVA ORDEN")
+        opcion = input("Opción: ").strip()
+
+        if not opcion_valida(opcion, MENU_VENTA):
+            print("Opción no válida.")
+
+        # Opciones 1 a 3: boletos (RN4: máximo 10 por orden)
+        elif opcion == "1" or opcion == "2" or opcion == "3":
+            cantidad = pedir_cantidad("Cantidad de boletos: ")
+            if cantidad < 1 or adultos + ninos + tercera + cantidad > MAX_BOLETOS:
+                print(f"Cantidad no válida o excede {MAX_BOLETOS} boletos por orden.")
+            else:
+                if opcion == "1":
+                    adultos += cantidad
+                elif opcion == "2":
+                    ninos += cantidad
+                else:
+                    tercera += cantidad
+                print("Agregado. Boletos en la orden:", adultos + ninos + tercera)
+
+        # Opción 4: combos (RN3)
+        elif opcion == "4":
+            cantidad = pedir_cantidad("Cantidad de combos: ")
+            if cantidad < 1:
+                print("Cantidad no válida.")
+            else:
+                combos += cantidad
+                print("Agregado. Combos en la orden:", combos)
+
+        # Opción 5: cobrar con ticket
+        elif opcion == "5":
+            if adultos + ninos + tercera + combos == 0:
+                print("La orden está vacía.")
+            else:
+                # RN2: 2x1 solo en adultos y solo en miércoles
+                if es_miercoles:
+                    adultos_a_pagar = adultos // 2 + adultos % 2
+                else:
+                    adultos_a_pagar = adultos
+
+                total = (adultos_a_pagar * precios["adulto"] + ninos * precios["niño"]
+                         + tercera * precios["tercera"] + combos * precios["combo"])
+
+                print("\n----------- TICKET -----------")
+                print(f"Fecha: {fecha_texto(fecha)}")
+                if adultos > 0:
+                    print(f"Adulto x{adultos}        ${adultos_a_pagar * precios['adulto']:.2f}")
+                if adultos_a_pagar < adultos:
+                    print(f"  (2x1 miércoles: se cobran {adultos_a_pagar} de {adultos})")
+                if ninos > 0:
+                    print(f"Niño x{ninos}          ${ninos * precios['niño']:.2f}")
+                if tercera > 0:
+                    print(f"Tercera edad x{tercera}  ${tercera * precios['tercera']:.2f}")
+                if combos > 0:
+                    print(f"Combo x{combos}         ${combos * precios['combo']:.2f}")
+                print(f"TOTAL: ${total:.2f}")
+                print("------------------------------")
+
+                # Se guarda la venta con la fecha en ventas.txt (modo "a")
+                detalle = f"{adultos} adulto, {ninos} niño, {tercera} tercera edad, {combos} combo, ${total:.2f}"
+                if anexar("ventas.txt", detalle, fecha):
+                    print("Venta guardada en ventas.txt")
+                return
+
+        # Opción 0: cancelar
+        else:
+            print("Orden cancelada.")
+            return
+
+
+def corte_turno(fecha):
+    """RN5: suma las ventas del día en ventas.txt y guarda el corte en cortes.txt."""
+    hoy = "[" + fecha_texto(fecha) + "]"
+    total = 0.0
+    ordenes = 0
+    try:
+        with open("ventas.txt", "r", encoding="utf-8") as f:
+            for linea in f:
+                if linea.startswith(hoy):       # solo las ventas de la fecha de hoy
+                    try:
+                        # El total es lo que va después del signo $
+                        monto = linea.strip().split("$")[1]
+                        total = total + float(monto)
+                        ordenes = ordenes + 1
+                    except (ValueError, IndexError):
+                        print(f"Renglón con error en ventas.txt: '{linea.strip()}'")
+    except FileNotFoundError:
+        print("Todavía no existe ventas.txt: no hay ventas para el corte.")
+        return
+
+    print("\n======= CORTE DE TURNO =======")
+    print(f"Fecha:            {fecha_texto(fecha)}")
+    print(f"Órdenes cobradas: {ordenes}")
+    print(f"Total vendido:    ${total:.2f}")
+    print("==============================")
+    if anexar("cortes.txt", f"{ordenes} órdenes, ${total:.2f}", fecha):
+        print("Corte guardado en cortes.txt")
+
+
+# ==============================================================
+#  PROGRAMA PRINCIPAL
 # ==============================================================
 
 def main():
     """Controla el programa con dos ciclos: inicio (externo) y menú (interno)."""
+    precios = cargar_precios()
     salir_programa = False
 
     # Ciclo externo: la pantalla de inicio. Se repite cuando la
@@ -197,12 +476,22 @@ def main():
                 en_menu = inactividad()
             elif not opcion_valida(opcion, MENU):
                 print(f"'{opcion}' no es una opción del menú. Elige un número de la tabla.")
+            elif opcion == "1":
+                registrar_venta(Fecha, es_miercoles, precios)
+            elif opcion == "2":
+                mostrar_archivos()
+            elif opcion == "3":
+                ver_archivo()
+            elif opcion == "4":
+                crear_archivo(Fecha)
+            elif opcion == "5":
+                agregar_registro(Fecha)
+            elif opcion == "6":
+                corte_turno(Fecha)
             elif opcion == "0":
                 en_menu = False
                 salir_programa = True
                 print(f"Fin del turno. ¡Hasta luego, {nombre.title()}!")
-            else:
-                print("(Esta opción se programa en el siguiente bloque)")
 
 
 main()

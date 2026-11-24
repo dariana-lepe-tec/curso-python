@@ -1,0 +1,5 @@
+[18/11/2026] 4 adulto, 0 niño, 0 tercera edad, 2 combo, $404.00
+[20/11/2026] 2 adulto, 0 niño, 0 tercera edad, 1 combo, $292.00
+[20/11/2026] 1 adulto, 2 niño, 0 tercera edad, 0 combo, $228.00
+[21/11/2026] 0 adulto, 0 niño, 2 tercera edad, 1 combo, $250.00
+[24/11/2026] 2 adulto, 0 niño, 0 tercera edad, 1 combo, $292.00

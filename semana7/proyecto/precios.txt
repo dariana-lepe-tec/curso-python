@@ -1,0 +1,4 @@
+adulto,90
+niño,69
+tercera,69
+combo,112

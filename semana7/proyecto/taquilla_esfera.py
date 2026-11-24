@@ -28,6 +28,17 @@ MAX_BOLETOS = 10   # RN4
 # Precios de respaldo por si precios.txt no existe o trae errores (RN1)
 PRECIOS_BASE = {"adulto": 90.0, "niño": 69.0, "tercera": 69.0, "combo": 112.0}
 
+# Menú principal guardado como matriz: cada fila es [número, texto]
+MENU = [
+    ["1", "Registrar venta"],
+    ["2", "Ver archivos"],
+    ["3", "Leer archivo"],
+    ["4", "Crear archivo"],
+    ["5", "Agregar registro"],
+    ["6", "Corte del turno"],
+    ["0", "Salir"],
+]
+
 # ==============================================================
 #  REQ 1, 2 y 3: inicio
 # ==============================================================
@@ -111,19 +122,87 @@ def preguntar_miercoles():
 
 
 # ==============================================================
-#  PROGRAMA PRINCIPAL (versión 1: solo el inicio)
+#  REQ 4 y 5: menú como matriz e inactividad
+# ==============================================================
+
+def dibujar_tabla(matriz, titulo):
+    """Req 4: dibuja un menú recorriendo su matriz con un for."""
+    print()
+    print("+-----+------------------------+")
+    print(f"| {titulo:<28} |")
+    print("+-----+------------------------+")
+    for fila in matriz:
+        print(f"|  {fila[0]}  | {fila[1]:<22} |")
+    print("+-----+------------------------+")
+
+
+def mostrar_menu():
+    """Req 4: dibuja el menú principal."""
+    dibujar_tabla(MENU, "TAQUILLA CINÉPOLIS ESFERA")
+    print("(Enter sin opción = inactividad)")
+
+
+def opcion_valida(opcion, matriz):
+    """Req 4: revisa si la opción escrita existe en la matriz del menú."""
+    for fila in matriz:
+        if fila[0] == opcion:
+            return True
+    return False
+
+
+def inactividad():
+    """Req 5: simula 10 minutos sin actividad y pregunta si se continúa.
+    Regresa True para seguir en el menú y False para volver al inicio."""
+    print("\nNo elegiste ninguna opción...")
+    # Simulado: cada vuelta del for representa 1 minuto (con una pausa corta)
+    for minuto in range(1, 11):
+        print(f"...{minuto} min sin actividad")
+        time.sleep(0.2)
+    # Se repite la pregunta hasta que escriban exactamente si o no
+    while True:
+        resp = input("¿Deseas continuar? (si/no): ").strip().lower()
+        if resp == "si":
+            return True
+        elif resp == "no":
+            print("Regresando a la pantalla de inicio...")
+            return False
+        print("Escribe exactamente si o no.")
+
+
+# ==============================================================
+#  PROGRAMA PRINCIPAL (versión 2: inicio + menú)
 # ==============================================================
 
 def main():
-    """Versión 1: prueba el inicio (nombre, bienvenida, carga y fecha)."""
-    nombre = pedir_nombre()
-    bienvenida(nombre)
-    pantalla_carga(3)
-    Fecha = pedir_fecha()
-    es_miercoles = preguntar_miercoles()
-    print("Fecha guardada como tupla:", Fecha)
-    print("¿Aplica 2x1?:", es_miercoles)
-    print("(El menú se agrega en el siguiente bloque)")
+    """Controla el programa con dos ciclos: inicio (externo) y menú (interno)."""
+    salir_programa = False
+
+    # Ciclo externo: la pantalla de inicio. Se repite cuando la
+    # inactividad responde "no", para pedir el nombre otra vez.
+    while not salir_programa:
+        nombre = pedir_nombre()
+        bienvenida(nombre)
+        pantalla_carga(3)
+        Fecha = pedir_fecha()
+        es_miercoles = preguntar_miercoles()
+
+        # Ciclo interno: el menú principal
+        en_menu = True
+        while en_menu:
+            mostrar_menu()
+            opcion = input("Elige una opción: ").strip()
+
+            if opcion == "":
+                # Enter sin opción: True sigue en el menú, False regresa al inicio
+                en_menu = inactividad()
+            elif not opcion_valida(opcion, MENU):
+                print(f"'{opcion}' no es una opción del menú. Elige un número de la tabla.")
+            elif opcion == "0":
+                en_menu = False
+                salir_programa = True
+                print(f"Fin del turno. ¡Hasta luego, {nombre.title()}!")
+            else:
+                print("(Esta opción se programa en el siguiente bloque)")
 
 
 main()

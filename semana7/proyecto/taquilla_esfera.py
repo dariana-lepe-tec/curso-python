@@ -19,6 +19,7 @@
 #   RN5 Al final del turno se hace un corte con el total vendido
 # ==============================================================
 
+import datetime
 import os
 import time
 
@@ -128,15 +129,11 @@ def fecha_texto(fecha):
     return f"{dia:02d}/{mes:02d}/{anio}"   # :02d pone un 0 a la izquierda: 5 -> 05
 
 
-def preguntar_miercoles():
-    """RN2: pregunta si hoy es miércoles para aplicar el 2x1 de adulto."""
-    while True:
-        resp = input("¿Hoy es miércoles? (si/no): ").strip().lower()
-        if resp == "si":
-            return True
-        elif resp == "no":
-            return False
-        print("Escribe exactamente si o no.")
+def calcular_miercoles(fecha):
+    """RN2: revisa con la fecha si el día es miércoles para el 2x1 de adulto.
+    weekday() regresa 0 = lunes, 1 = martes, 2 = miércoles..."""
+    dia, mes, anio = fecha              # desempaquetar la tupla
+    return datetime.date(anio, mes, dia).weekday() == 2
 
 
 # ==============================================================
@@ -470,7 +467,9 @@ def main():
         bienvenida(nombre)
         pantalla_carga(3)
         Fecha = pedir_fecha()
-        es_miercoles = preguntar_miercoles()
+        es_miercoles = calcular_miercoles(Fecha)
+        if es_miercoles:
+            print("Hoy es miércoles: aplica 2x1 en boletos de adulto.")
 
         # Ciclo interno: el menú principal
         en_menu = True

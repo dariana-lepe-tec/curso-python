@@ -25,6 +25,9 @@ import time
 # ---- Constantes ----
 MAX_BOLETOS = 10   # RN4
 
+# Días que tiene cada mes (enero a diciembre)
+DIAS_POR_MES = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
 # Precios de respaldo por si precios.txt no existe o trae errores (RN1)
 PRECIOS_BASE = {"adulto": 90.0, "niño": 69.0, "tercera": 69.0, "combo": 112.0}
 
@@ -101,16 +104,20 @@ def pedir_fecha():
             dia = int(dia)
             mes = int(mes)
             anio = int(anio)
-            if dia < 1 or dia > 31:
-                print("El día debe estar entre 1 y 31. Intenta de nuevo.")
-            elif mes < 1 or mes > 12:
+            if mes < 1 or mes > 12:
                 print("El mes debe estar entre 1 y 12. Intenta de nuevo.")
             elif anio < 2000:
                 print("Revisa el año, debe tener 4 dígitos. Intenta de nuevo.")
             else:
-                # Tupla SIN paréntesis, tal como lo pide el requerimiento
-                Fecha = dia, mes, anio
-                return Fecha
+                limite = DIAS_POR_MES[mes - 1]        # la lista empieza en 0
+                if mes == 2 and anio % 4 == 0:         # año bisiesto: febrero tiene 29
+                    limite = 29
+                if dia < 1 or dia > limite:
+                    print(f"El mes {mes} solo tiene {limite} días. Intenta de nuevo.")
+                else:
+                    # Tupla SIN paréntesis, tal como lo pide el requerimiento
+                    Fecha = dia, mes, anio
+                    return Fecha
         except ValueError:
             print(f"'{texto}' no es una fecha válida. Usa el formato dd/mm/aaaa, por ejemplo 23/11/2026.")
 

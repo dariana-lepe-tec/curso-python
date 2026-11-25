@@ -340,12 +340,12 @@ def cargar_precios():
 # ==============================================================
 
 def pedir_cantidad(mensaje):
-    """Pide una cantidad entera; regresa 0 si lo escrito no es un número."""
-    try:
-        return int(input(mensaje))
-    except ValueError:
-        print("Eso no es un número entero.")
-        return 0
+    """Pide una cantidad entera; si escriben letras, vuelve a preguntar."""
+    while True:
+        try:
+            return int(input(mensaje))
+        except ValueError:
+            print("Eso no es un número entero. Escribe solo números.")
 
 
 def registrar_venta(fecha, es_miercoles, precios):

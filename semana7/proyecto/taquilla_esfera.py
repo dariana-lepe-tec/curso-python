@@ -447,7 +447,18 @@ def corte_turno(fecha):
     print(f"Órdenes cobradas: {ordenes}")
     print(f"Total vendido:    ${total:.2f}")
     print("==============================")
-    if anexar("cortes.txt", f"{ordenes} órdenes, ${total:.2f}", fecha):
+    # Revisar si ya hay un corte con esta fecha para no guardarlo dos veces
+    ya_existe = False
+    try:
+        with open("cortes.txt", "r", encoding="utf-8") as f:
+            for linea in f:
+                if linea.startswith(hoy):
+                    ya_existe = True
+    except FileNotFoundError:
+        pass                    # si no existe cortes.txt, no hay cortes previos
+    if ya_existe:
+        print("El corte de esta fecha ya estaba guardado; no se duplica.")
+    elif anexar("cortes.txt", f"{ordenes} órdenes, ${total:.2f}", fecha):
         print("Corte guardado en cortes.txt")
 
 
